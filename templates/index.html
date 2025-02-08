@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block body%}
+    <!-- Formulario -->
+    <div class="d-flex justify-content-center mt-3">
+        <form method="POST" action="{{url_for('search')}}" class="row g-3 d-flex align-items-center">
+            <div class="col-auto">
+                <label for="id" class="form-label">Ingrese el ID del Juego</label>
+            </div>
+            <div class="col-auto">
+              <input type="number" class="form-control" placeholder="1, 2, 4, 22, 548..." name="id">
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary"> Buscar </button>
+            </div>
+        </form>
+    </div>
+    <div class="container text-center mt-5 d-flex justify-content-center gap-4">
+      <a href="/agregar" class="btn btn-primary"> Ingresar nuevo </a>
+      <a href="#" class="btn btn-primary"> Actualizar registro </a>
+    </div>
+{% endblock %}

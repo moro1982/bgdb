@@ -1,0 +1,9 @@
+.buscador {
+    display: flex;
+    justify-content: center;
+}
+
+.buscador .formulario {
+    display: flex;
+    align-items: center;
+}
