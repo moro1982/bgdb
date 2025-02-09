@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% block body %}
-    {% if mensaje == 1: %}
+
+    {% if mensaje == 1 %}
         <div class="container text-center alert alert-danger my-2" role="alert">
             Ya existe un juego con el nombre {{ item['name'] }} en nuestros registros.
             Verifique los datos ingresados.
@@ -9,11 +10,16 @@
         <div class="container text-center alert alert-success my-2" role="alert">
             El juego ha sido ingresado con exito!!
         </div>
-    {% else: %}
+    {% elif mensaje == 3 %}
+        <div class="container text-center alert alert-danger my-2" role="alert">
+            El ID ingresado no corresponde a ningun juego registrado. Verifiquelo.
+        </div>
+    {% else %}
         <div class="container text-center alert alert-success my-2" role="alert">
             Juego encontrado!!
         </div>
     {% endif %}
+
     <div class="container text-center">
         <div class="container d-flex justify-content-center">
             <h1 class="text-center"> Datos del juego: </h1>
@@ -24,15 +30,15 @@
         <p> Pais de origen: {{ item['fromCountry'] }} </p>
         <p> Precio (en dolares): {{ item['priceDollars'] }} </p>
     </div>
-    {% if mensaje == 1: %}
+    
+    {% if mensaje == 1 %}
         <div class="container d-flex justify-content-center gap-3 my-3">
             <a href="#" class="btn btn-success"> Crear nuevo registro </a>
             <a href="#" class="btn btn-dark"> Actualizar registro </a>
         </div>
-    {% else: %}
+    {% else %}
     <div class="container d-flex justify-content-center gap-3 my-3">
         <a href="/" class="btn btn-success"> Volver al Inicio </a>
     </div>
     {% endif %}
-    
 {% endblock %}
