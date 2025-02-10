@@ -8,10 +8,9 @@ app = Flask(__name__)
 
 ## DATABASE MANAGER ##
 
-# Conexion
-myClient = pymongo.MongoClient("mongodb://localhost:27017")
-myDB = myClient["bgdb"]         # Base de datos
-myCollection = myDB["items"]    # Coleccion
+myClient = pymongo.MongoClient("mongodb://localhost:27017")     # Conexion
+myDB = myClient["bgdb"]                                         # Base de datos
+myCollection = myDB["items"]                                    # Coleccion
 
 # Ingresa un nuevo documento a la coleccion
 def insertNew(data):
@@ -110,7 +109,7 @@ def agregando_item():
         formInput = request.form
         formInput = formInput.to_dict()
         resultado = queryOneItem( {'name' : formInput['name']} )
-        print(resultado)
+        
         if resultado == None:
             # Insertamos los datos del nuevo juego
             agregado = insertNew(formInput)
@@ -119,6 +118,7 @@ def agregando_item():
         else:
             # No insertamos nada y avisamos que ya existe
             return render_template("results.html", item=resultado, nuevo=formInput, mensaje=1)
+        
     else:
         return redirect("/")
     
