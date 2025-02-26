@@ -1,4 +1,73 @@
 {% extends 'layout.html' %}
 {% block body %}
+    <h2 class="text-center text-uppercase"> Actualizar </h2>
+    <h3 class="text-center"> Verifique y actualice los datos del juego: </h3>
+    <form method="POST" action="{{ url_for('actualizando_item', objID=item['_id']) }}" class="container my-3">
+        <div class="mb-3">
+            <label for="name" class="form-label"> Nombre del juego </label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="name" 
+                name="name" 
+                value="{{ item['name'] }}"
+            >
+        </div>
+        <div class="mb-3">
+            <label for="min-players" class="form-label"> Cantidad minima de jugadores </label>
+            <input 
+                type="number" 
+                class="form-control" 
+                id="min-players" 
+                name="minPlayers" 
+                value="{{ item['minPlayers'] }}"
+            >
+        </div>
+        <div class="mb-3">
+            <label for="max-players" class="form-label"> Cantidad maxima de jugadores </label>
+            <input 
+                type="number" 
+                class="form-control" 
+                id="max-players" 
+                name="maxPlayers"
+                value="{{ item['maxPlayers'] }}"
+            >
+        </div>
+        <div class="mb-3">
+            <label for="min-age" class="form-label"> Edad minima </label>
+            <input 
+                type="number" 
+                class="form-control" 
+                id="minAge" 
+                name="minAge"
+                value="{{ item['minAge'] }}"
+            >
+        </div>
+        <div class="mb-3">
+            <label for="from-country" class="form-label"> Pais de origen </label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="from-country" 
+                name="fromCountry"
+                value="{{ item['fromCountry'] }}"
+            >
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label"> Precio en dolares </label>
+            <input 
+                type="number" 
+                step="0.01" 
+                class="form-control" 
+                id="price" 
+                name="priceDollars"
+                value="{{ item['priceDollars'] }}"
+            >
+        </div>
+        <button type="submit" class="btn btn-warning"> Actualizar </button>
+    </form>
 
+    <div class="container d-flex justify-content-center gap-3 my-3">
+        <a href="/" class="btn btn-primary"> Volver al Inicio </a>
+    </div>
 {% endblock %}

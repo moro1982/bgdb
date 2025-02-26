@@ -1,21 +1,51 @@
 {% extends 'layout.html' %}
 {% block body%}
+    <!-- TITULOS -->
+    <h1 class="text-center text-uppercase"> Buscador </h1>
+    <h3 class="text-center"> Ingrese el codigo, el nombre, u otros atributos del juego que desea buscar:</h3>
     <!-- Formulario -->
-    <div class="d-flex justify-content-center mt-3">
-        <form method="POST" action="{{url_for('search')}}" class="row g-3 d-flex align-items-center">
-            <div class="col-auto">
-                <label for="id" class="form-label">Ingrese el ID del Juego</label>
-            </div>
-            <div class="col-auto">
-              <input type="number" class="form-control" placeholder="1, 2, 4, 22, 548..." name="id">
-            </div>
-            <div class="col-auto">
-              <button type="submit" class="btn btn-primary"> Buscar </button>
-            </div>
-        </form>
-    </div>
-    <div class="container text-center mt-5 d-flex justify-content-center gap-4">
-      <a href="/agregar" class="btn btn-primary"> Ingresar nuevo </a>
-      <a href="/actualizar" class="btn btn-primary"> Actualizar registro </a>
+    <div class="d-flex flex-column gap-5 align-items-center mt-3">
+      <form method="POST" action="{{url_for('search')}}" class="d-flex flex-column align-items-center mt-3">
+        <!-- CAMPOS -->
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex flex-row justify-content-between align-items-center">
+              <label for="_id"> ID del Juego </label>
+              <input type="text" class="form-control" placeholder="67ba4a3303...(24 chars)" name="_id">
+          </div>
+          <div class="d-flex flex-row gap-3 align-items-center">
+            <label for="name"> Nombre </label>
+            <input type="text" class="form-control" placeholder="Como se llama el juego?" name="name">
+          </div>
+          <div class="d-flex flex-row gap-3 align-items-center">
+            <label for="minPlayers"> Minima Cant. de Jugadores </label>
+            <input type="number" class="form-control" placeholder="Numero de jugadores" name="minPlayers">
+          </div>
+          <div class="d-flex flex-row gap-3 align-items-center">
+            <label for="maxPlayers"> Maxima Cant. de Jugadores </label>
+            <input type="number" class="form-control" placeholder="Numero de jugadores" name="maxPlayers">
+          </div>
+          <div class="d-flex flex-row gap-3 align-items-center">
+            <label for="minAge"> Edad minima recomendada</label>
+            <input type="number" class="form-control" placeholder="Edad (años)" name="minAge">
+          </div>
+          <div class="d-flex flex-row gap-3 align-items-center">
+            <label for="fromCountry"> Pais de origen </label>
+            <input type="text" class="form-control" placeholder="De donde es el juego (pais)?" name="fromCountry">
+          </div>
+          <div class="d-flex flex-row gap-3 align-items-center">
+            <label for="priceDollars"> Precio (en dolares) </label>
+            <input type="number" class="form-control" placeholder="99.99" name="priceDollars">
+          </div>
+        </div> <!-- FIN campos -->
+        <!-- BOTONES -->
+        <div class="d-flex justify-content-around gap-3 mt-3">
+          <input type="submit" class="btn btn-primary" name="accion" value="Buscar">
+          <input type="submit" class="btn btn-secondary" name="accion" value="Actualizar">
+          <input type="submit" class="btn btn-danger" name="accion" value="Eliminar">
+        </div>
+      </form>
+      <div class="container text-center mb-5 d-flex justify-content-center gap-4">
+        <a href="/agregar" class="btn btn-success"> Ingresar nuevo </a>
+      </div>
     </div>
 {% endblock %}

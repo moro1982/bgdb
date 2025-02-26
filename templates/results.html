@@ -3,7 +3,7 @@
 
     {% if mensaje == 1 %}
         <div class="container text-center alert alert-danger my-2" role="alert">
-            Ya existe un juego con el nombre {{ item['name'] }} en nuestros registros.
+            Ya existe un juego con el nombre {{ items['name'] }} en nuestros registros.
             Verifique los datos ingresados.
         </div>
     {% elif mensaje == 2 %}
@@ -11,34 +11,65 @@
             El juego ha sido ingresado con exito!!
         </div>
     {% elif mensaje == 3 %}
+        <div class="container text-center alert alert-warning my-2" role="alert">
+            Los datos del juego han sido actualizados con exito!!
+        </div>
+    {% elif mensaje == 4 %}
         <div class="container text-center alert alert-danger my-2" role="alert">
-            El ID ingresado no corresponde a ningun juego registrado. Verifiquelo.
+            El campo ingresado no corresponde a ningun juego registrado. Verifiquelo.
+        </div>
+    {% elif mensaje == 5 %}
+        <div class="container text-center alert alert-danger my-2" role="alert">
+            ATENCION!!! Desea ELIMINAR el siguiente elemento DEFINITIVAMENTE ???
+        </div>
+    {% elif mensaje == 6 %}
+        <div class="container text-center alert alert-success my-2" role="alert">
+            Registro eliminado exitosamente.
+        </div>
+    {% elif mensaje == 7 %}
+        <div class="container text-center alert alert-success my-2" role="alert">
+            Ha habido un error durante el guardado del registro. Intente nuevamente.
         </div>
     {% else %}
         <div class="container text-center alert alert-success my-2" role="alert">
-            Juego encontrado!!
+            Juego(s) encontrado(s)!!
         </div>
     {% endif %}
 
-    <div class="container text-center">
-        <div class="container d-flex justify-content-center">
-            <h1 class="text-center"> Datos del juego: </h1>
+    {% for item in items %}
+        <div class="container text-center">
+            <div class="container d-flex justify-content-center">
+                <h2 class="text-center"> Datos del juego: </h2>
+            </div>
+            {% for k,v in item.items() %}
+                <p> {{ k }} : {{ v }} </p>
+            {% endfor %}
         </div>
-        <p> ID: {{ item['id'] }} </p>
-        <p> Nombre: {{ item['name'] }} </p>
-        <p> Cantidad de jugadores: {{ item['minPlayers'] }} - {{ item['maxPlayers'] }} </p>
-        <p> Pais de origen: {{ item['fromCountry'] }} </p>
-        <p> Precio (en dolares): {{ item['priceDollars'] }} </p>
-    </div>
-    
-    {% if mensaje == 1 %}
-        <div class="container d-flex justify-content-center gap-3 my-3">
-            <a href="#" class="btn btn-success"> Crear nuevo registro </a>
-            <a href="#" class="btn btn-dark"> Actualizar registro </a>
+    {% endfor %}
+
+    {% if mensaje == 1: %}
+        <div class="container gap-3 my-3">
+            <div class="container d-flex justify-content-center gap-3 my-3">
+                <a href="/agregar" class="btn btn-success"> Crear nuevo registro </a>
+            </div>
+            <p class="text-center fw-bold">
+                Para actualizar este registro, vuelva al Buscador e ingrese el ID "{{ items[0]['_id'] }}". Luego, presione el boton "Actualizar"
+            </p>
         </div>
-    {% else %}
-    <div class="container d-flex justify-content-center gap-3 my-3">
-        <a href="/" class="btn btn-success"> Volver al Inicio </a>
-    </div>
     {% endif %}
+    {% if mensaje == 4 : %}
+        <div class="container d-flex justify-content-center gap-3 my-3">
+            <a href="/agregar" class="btn btn-success"> Crear nuevo registro </a>
+        </div>
+    {% endif %}
+    {% if mensaje == 5 : %}
+        <div class="container d-flex justify-content-center gap-3 my-3">
+            <a href="{{ url_for('eliminar', objID=items[0]['_id']) }}" class="btn btn-danger"> Eliminar registro </a>
+            <a href="/" class="btn btn-primary"> Cancelar </a>
+        </div>
+    {% endif %}
+
+    <div class="container d-flex justify-content-center gap-3 my-3">
+        <a href="/" class="btn btn-primary"> Volver al Inicio </a>
+    </div>
 {% endblock %}
