@@ -104,6 +104,15 @@ def corregirDatosForm(datos):
                 filtrado[k] = (float)(filtrado[k])
         return filtrado
 
+def validarForm(form):
+    countEmptyFields = 0
+    for k,v in form.items():
+        if v == '':
+            countEmptyFields += 1
+            print(countEmptyFields)
+    return countEmptyFields
+                
+
 ###################################################################################################
 
 ### RUTAS ###
@@ -163,6 +172,13 @@ def agregar():
 def agregando_item():
     if request.method == 'POST':
         formInput = request.form
+        
+        # Aqui deberia hacerse la validacion de los campos del formulario y gestionar los errores
+        #####################################
+        vacios = validarForm(formInput)
+        print(vacios)
+        #####################################
+        
         formInput = formInput.to_dict()
         filtrado = corregirDatosForm(formInput)
         resultado = queryData( {'name' : filtrado['name']} )
