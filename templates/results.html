@@ -37,13 +37,31 @@
     {% endif %}
 
     {% for item in items %}
-        <div class="container text-center">
-            <div class="container d-flex justify-content-center">
+        {% set claves = [ "ID:", 
+                      "Nombre del juego:",
+                      "Minima cantidad de jugadores:",
+                      "Maxima cantidad de jugadores:",
+                      "Edad minima recomendada:",
+                      "Pais de origen:",
+                      "Precio (en dolares):"
+                    ]
+        %}
+        <div class="container resultados">
+            <div class="container">
                 <h2 class="text-center"> Datos del juego: </h2>
             </div>
-            {% for k,v in item.items() %}
-                <p> {{ k }} : {{ v }} </p>
-            {% endfor %}
+            <div>
+                <ul class="list-group list-group-flush">
+                    {% set ns = namespace(i = 0) %}
+                    {% for k,v in item.items() %}
+                        <li class="list-group-item d-flex gap-2 justify-content-center">
+                            <span class="fw-bold"> {{ claves[ns.i] }} </span>
+                            <p> {{ v }} </p>
+                        </li>
+                        {% set ns.i = ns.i+1 %}
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     {% endfor %}
 

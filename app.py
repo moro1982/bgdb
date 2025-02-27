@@ -233,7 +233,7 @@ if __name__ == "__main__":
 #                         )
 #     else:
 #         return redirect( "/" )
-
+#
 # Ruta destino de los resultados del metodo GET #
 # @app.route("/results/<_id>/<id>/<name>/<minPlayers>/<maxPlayers>/<minAge>/<fromCountry>/<priceDollars>/")
 # def results(_id, id, name, minPlayers, maxPlayers, minAge, fromCountry, priceDollars):
@@ -250,7 +250,9 @@ if __name__ == "__main__":
 #                            )
 #
 ################################################################################################
-
+#
+#   ## REGISTROS DE PRUEBA ##
+#
 # item01 = {"name" : "Saboteur",
 #           "minPlayers" : 3,
 #           "maxPlayers" : 10,
@@ -321,7 +323,11 @@ if __name__ == "__main__":
 #           "fromCountry": "Argentina",
 #           "priceDollars": "9.99"
 #           }
-
+#
+######################################################################################################
+#
+#   ## EJEMPLOS DE EJECUCION DE COMANDOS DEL CRUD ##
+#
 # insertData(item04)
 # readAll()
 # queryData({"name":"Kremlin"})
