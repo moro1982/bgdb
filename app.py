@@ -1,9 +1,11 @@
 import pymongo
 from bson import ObjectId       # Libreria para trabajar con ObjectIDs de MongoDB
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for
+from subprocess import call
 
 app = Flask(__name__)
 
+###################################################################################################
 ###################################################################################################
 
 ### DATABASE MANAGER ###
@@ -14,13 +16,11 @@ myCollection = myDB["items"]                                    # Coleccion
 
 ## Ingresa un nuevo documento a la coleccion ##
 def insertNew(data):
-    
     for k in data:
         if k in {"minPlayers", "maxPlayers", "minAge"}:
             data[k] = int(data[k])
         if k == "priceDollars":
             data[k] = float(data[k])
-    
     insertion = myCollection.insert_one(data)
     print("ID insertado: " + str(insertion.inserted_id) + str(type(insertion.inserted_id)))
     result = myCollection.find_one(insertion.inserted_id)
@@ -88,31 +88,46 @@ def deleteDataObjID(id):
     borrado = myCollection.delete_one(query)
     return borrado.raw_result
 
+## Realizar un backup de la BBDD ##
+def exportarMongo():
+    call("mongoexport --uri=mongodb://localhost:27017 --db=bgdb --collection=items --jsonArray --pretty --out=backup/bgdb_backup.json")
+
+###################################################################################################
 ###################################################################################################
 
 ### FUNCIONES AUXILIARES ###
 
 ## Funcion para quitar campos vacios y corregir tipos numericos ##
-def corregirDatosForm(datos):
-    # Filtro el el documento por comprension
-        filtrado = { k:v for k,v in datos.items() if v != '' }
-        # Modifico el tipo de dato de los campos numericos (string a int o float)
-        for k in filtrado:
-            if k in {"minPlayers", "maxPlayers", "minAge"}:
-                filtrado[k] = (int)(filtrado[k])
-            if k == "priceDollars":
-                filtrado[k] = (float)(filtrado[k])
-        return filtrado
+def filtrarForm(formInput):
+    # Copiamos a un dict el formInput y le quitamos los campos vacios filtrandolo por comprension
+    formDict = formInput.to_dict()
+    filtrado = { k:v for k,v in formDict.items() if v != '' }
+    # Modifico el tipo de dato de los campos numericos (string a int o float)
+    for k in filtrado:
+        if k in {"minPlayers", "maxPlayers", "minAge"}:
+            filtrado[k] = (int)(filtrado[k])
+        if k == "priceDollars":
+            filtrado[k] = (float)(filtrado[k])
+    return filtrado
 
-def validarForm(form):
-    countEmptyFields = 0
-    for k,v in form.items():
-        if v == '':
-            countEmptyFields += 1
-            print(countEmptyFields)
-    return countEmptyFields
-                
-
+## Funcion para validar campos de Insercion/Actualizacion de registros ##
+def validarForm(filtrado):
+    cantValidos = filtrado.items().__len__()
+    if cantValidos < 6:
+        # Campos vacios
+        codValidacion = 10
+        return codValidacion
+    else:
+        # Validar campo 'name' #
+        encontrados = queryData( {'name' : filtrado['name']} )
+        listaEncontrados = encontrados.to_list()
+        cantidad = len(listaEncontrados)
+        if cantidad > 0:
+            # Nombre encontrado
+            codValidacion = 11
+            return codValidacion
+    
+###################################################################################################
 ###################################################################################################
 
 ### RUTAS ###
@@ -127,40 +142,42 @@ def main():
 def search():    
     if request.method == "POST":
         
-        # Extraigo los datos del formulario a un diccionario
-        datos = request.form.to_dict()
+        formInput = request.form
         # Aplico funcion para quitar campos vacios y corregir tipos numericos
-        filtrado = corregirDatosForm(datos)
+        filtrado = filtrarForm(formInput)
         # Quito y almaceno el campo "accion"
-        accion = filtrado.pop("accion")
+        accion = filtrado.pop("accion")            
         
-        # "filtrado" contiene los parametros de busqueda para la funcion "queryData"
+        # Busqueda - "filtrado" --> parametro
         listaResultados = []
         if filtrado.items().__len__() != 0:
             # Si el "filtrado" posee elementos, lo pasamos como parametro de busqueda
             listaResultados = queryData(filtrado).to_list()
-            print(listaResultados)
         else:
             # Si el "filtrado" esta vacio, retornara todos los documentos
             listaResultados = readAll().to_list()
-            print(listaResultados)
             
         # Contamos la cantidad de elementos encontrados
         cantidad = len(listaResultados)
         print("Cantidad de elementos: " + str(cantidad))
         if cantidad == 0:
             # Si no encuentro elementos, paso solo el mensaje de error a la vista
-            return render_template( "results.html", mensaje=4 )
+            return render_template( "results.html", mensaje=0 )
         else:
             # Si encuentro 1 o mas elementos, lo paso a la vista correspondiente (y si corresponde, tambien el mensaje)
             if accion == "Buscar":
                 return render_template( "results.html", items=listaResultados )
             if accion == "Actualizar":
-                item = listaResultados.pop()
-                return render_template( "actualizar.html", item=item )
+                if cantidad == 1:
+                    item = listaResultados.pop()
+                    return render_template( "actualizar.html", item=item )
+                else:
+                    return render_template( "results.html", mensaje=3 )
             if accion == "Eliminar":
-                return render_template( "results.html", items=listaResultados, mensaje=5 )
-            
+                if cantidad == 1:
+                    return render_template( "results.html", items=listaResultados, mensaje=5 )
+                else:
+                    return render_template( "results.html", mensaje=6 )
         
 ## Ruta formulario de insercion de registros a la BBDD ##
 @app.route("/agregar")
@@ -173,31 +190,31 @@ def agregando_item():
     if request.method == 'POST':
         formInput = request.form
         
-        # Aqui deberia hacerse la validacion de los campos del formulario y gestionar los errores
-        #####################################
-        vacios = validarForm(formInput)
-        print(vacios)
-        #####################################
+        # Filtrado de campos vacios y correccion de tipos numericos
+        filtrado = filtrarForm(formInput)
         
-        formInput = formInput.to_dict()
-        filtrado = corregirDatosForm(formInput)
-        resultado = queryData( {'name' : filtrado['name']} )
-        listaEncontrados = resultado.to_list()
-        cantidad = listaEncontrados.__len__()
+        # Validacion de los campos del formulario - Gestion de errores
+        codigoValidacion = validarForm(filtrado)
+        print(codigoValidacion)
         
-        if cantidad == 0:
+        if codigoValidacion == 11:
+            resultado = queryData( {'name' : filtrado['name']} )
+            listaEncontrados = resultado.to_list()
+            # mensaje == 1 --> Elemento encontrado por 'name'
+            return render_template("results.html", items=listaEncontrados, mensaje=1)
+        elif codigoValidacion == 10:
+            # mensaje == 8 --> Hay campos vacios
+            return render_template("results.html", mensaje=8)
+        else:
             # Insertamos los datos del nuevo juego
-            agregado = insertNew(formInput)
+            agregado = insertNew(filtrado)
             listaAgregados = []
             listaAgregados.append(agregado)
             
             if len(listaAgregados) > 0:
                 return render_template("results.html", items=listaAgregados, mensaje=2)
             else:
-                return render_template("results.html", mensaje=7)
-        else:
-            # No insertamos nada y avisamos que ya existe
-            return render_template("results.html", items=listaEncontrados, nuevo=formInput, mensaje=1)
+                return render_template("results.html", mensaje=9)
     else:
         return redirect("/")
 
@@ -206,65 +223,46 @@ def agregando_item():
 def actualizar():
     return render_template("actualizar.html")
 
-## Ruta intermedia del metodo POST activado desde formulario de "actualizar.html" ##
+## Ruta intermedia - metodo POST desde formulario "actualizar.html" ##
 @app.route("/actualizando_item/<objID>/", methods=['GET', 'POST'])
 def actualizando_item(objID):
     if request.method == 'POST':
         formInput = request.form
-        formInput = formInput.to_dict()
-        formInput = corregirDatosForm(formInput)        
+        
+        # Filtrado de campos vacios y correccion de tipos numericos
+        filtrado = filtrarForm(formInput)
+        
+        # Validacion de los campos del formulario - Gestion de errores
+        #####################################
+        codValidacion = validarForm(filtrado)
+        print(codValidacion)
+        
+        if codValidacion == 10:
+            # mensaje == 8 --> Hay campos vacios
+            return render_template("results.html", mensaje=8)
+        else:
+            actualizado = updateDataKeyValue("_id", ObjectId(objID), filtrado)
+            return render_template("results.html", item=actualizado, mensaje=4)
 
-        actualizado = updateDataKeyValue("_id", ObjectId(objID), formInput)
-        return render_template("results.html", item=actualizado, mensaje=3)
-
-## Ruta intermedia del metodo POST activado desde la vista "results.html" con accion "Eliminar" ##
+## Ruta intermedia activada desde la vista "results.html" con accion "Eliminar" ##
 @app.route("/eliminar/<objID>")
 def eliminar(objID):
     print(objID)
     eliminado = deleteDataObjID(objID)
     print(eliminado)
-    return render_template("results.html", item=eliminado, mensaje=6)
+    return render_template("results.html", item=eliminado, mensaje=7)
+
+## Ruta Backup ##
+@app.route("/backup")
+def backup():
+    exportarMongo()
+    return render_template("results.html", mensaje=10)
 
 if __name__ == "__main__":
     app.run(debug=True)
     
 ################################################################################################
-# Ruta destino del metodo GET (activado desde el formulario del "index") #
-# def search():
-#     if request.method == 'GET':
-#         id = request.args['id']
-#         print(id)
-#         item = queryOneItem( {"id":int(id)} )
-#         print(item['fromCountry'])
-#         return redirect( url_for('results',
-#                                  _id=item["_id"],
-#                                  id=item["id"],
-#                                  name=item["name"],
-#                                  minPlayers=item["minPlayers"],
-#                                  maxPlayers=item["maxPlayers"],
-#                                  minAge=item["minAge"],
-#                                  fromCountry=item["fromCountry"],
-#                                  priceDollars=item["priceDollars"]
-#                                  )
-#                         )
-#     else:
-#         return redirect( "/" )
-#
-# Ruta destino de los resultados del metodo GET #
-# @app.route("/results/<_id>/<id>/<name>/<minPlayers>/<maxPlayers>/<minAge>/<fromCountry>/<priceDollars>/")
-# def results(_id, id, name, minPlayers, maxPlayers, minAge, fromCountry, priceDollars):
-#     print(name)
-#     return render_template( "results.html",
-#                            _id=_id,
-#                            id=id,
-#                            name=name,
-#                            minPlayers=minPlayers,
-#                            maxPlayers=maxPlayers,
-#                            minAge=minAge,
-#                            fromCountry=fromCountry,
-#                            priceDollars=priceDollars
-#                            )
-#
+
 ################################################################################################
 #
 #   ## REGISTROS DE PRUEBA ##

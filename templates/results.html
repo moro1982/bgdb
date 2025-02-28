@@ -1,41 +1,75 @@
 {% extends 'layout.html' %}
 {% block body %}
 
-    {% if mensaje == 1 %}
+    <!-- Buscar -->
+    {% if mensaje == 0 %}
+        <!-- Juego no encontrado -->
         <div class="container text-center alert alert-danger my-2" role="alert">
-            Ya existe un juego con el nombre {{ items['name'] }} en nuestros registros.
+            El/los campo(s) ingresado(s) no corresponde(n) a ningun juego registrado. Verifiquelo.
+        </div>
+
+    <!-- Insertar -->
+    {% elif mensaje == 1 %}
+        <!-- Existe juego con el mismo nombre -->
+        <div class="container text-center alert alert-danger my-2" role="alert">
+            Ya existe un juego con el nombre "{{ items[0]['name'] }}" en nuestros registros.
             Verifique los datos ingresados.
         </div>
     {% elif mensaje == 2 %}
+        <!-- Juego agregado -->
         <div class="container text-center alert alert-success my-2" role="alert">
             El juego ha sido ingresado con exito!!
         </div>
+
+    <!-- Actualizar -->
     {% elif mensaje == 3 %}
-        <div class="container text-center alert alert-warning my-2" role="alert">
-            Los datos del juego han sido actualizados con exito!!
+        <div class="container text-center alert alert-danger my-2" role="alert">
+            ACCION CANCELADA !!! No se puede actualizar mas de un elemento a la vez. Realice una busqueda mas precisa.
         </div>
     {% elif mensaje == 4 %}
-        <div class="container text-center alert alert-danger my-2" role="alert">
-            El campo ingresado no corresponde a ningun juego registrado. Verifiquelo.
+        <div class="container text-center alert alert-success my-2" role="alert">
+            Los datos del juego han sido actualizados con exito!!
         </div>
+
+    <!-- Eliminar -->
     {% elif mensaje == 5 %}
         <div class="container text-center alert alert-danger my-2" role="alert">
             ATENCION!!! Desea ELIMINAR el siguiente elemento DEFINITIVAMENTE ???
         </div>
     {% elif mensaje == 6 %}
-        <div class="container text-center alert alert-success my-2" role="alert">
-            Registro eliminado exitosamente.
+        <div class="container text-center alert alert-danger my-2" role="alert">
+            ACCION CANCELADA !!! No se puede eliminar mas de un elemento a la vez.
         </div>
     {% elif mensaje == 7 %}
         <div class="container text-center alert alert-success my-2" role="alert">
+            Registro eliminado exitosamente.
+        </div>
+    
+    <!-- Errores -->
+    {% elif mensaje == 8 %}
+        <!-- Campos vacios -->
+        <div class="container text-center alert alert-danger my-2" role="alert">
+            Ha habido un error en los datos cargados. Verifique el tipo de dato ingresado y que el campo no se encuentre vacio, e intente nuevamente.
+        </div>
+    {% elif mensaje == 9 %}
+        <div class="container text-center alert alert-danger my-2" role="alert">
             Ha habido un error durante el guardado del registro. Intente nuevamente.
         </div>
+
+    <!-- Backup -->
+    {% elif mensaje == 10 %}
+    <div class="container text-center alert alert-success my-2" role="alert">
+        Se ha realizado exitosamente la copia de respaldo de la coleccion.
+    </div>
+    
+    <!-- Encontrado(s) -->
     {% else %}
         <div class="container text-center alert alert-success my-2" role="alert">
             Juego(s) encontrado(s)!!
         </div>
     {% endif %}
 
+    <!-- Se muestran los datos de elementos encontrados, actualizados, ingresados, eliminados... -->
     {% for item in items %}
         {% set claves = [ "ID:", 
                       "Nombre del juego:",
@@ -65,6 +99,12 @@
         </div>
     {% endfor %}
 
+    <!-- Se agregan botones al final para las acciones que se requieran segun el mensaje -->
+    {% if mensaje == 0 : %}
+        <div class="container d-flex justify-content-center gap-3 my-3">
+            <a href="/agregar" class="btn btn-success"> Crear nuevo registro </a>
+        </div>
+    {% endif %}
     {% if mensaje == 1: %}
         <div class="container gap-3 my-3">
             <div class="container d-flex justify-content-center gap-3 my-3">
@@ -75,11 +115,6 @@
             </p>
         </div>
     {% endif %}
-    {% if mensaje == 4 : %}
-        <div class="container d-flex justify-content-center gap-3 my-3">
-            <a href="/agregar" class="btn btn-success"> Crear nuevo registro </a>
-        </div>
-    {% endif %}
     {% if mensaje == 5 : %}
         <div class="container d-flex justify-content-center gap-3 my-3">
             <a href="{{ url_for('eliminar', objID=items[0]['_id']) }}" class="btn btn-danger"> Eliminar registro </a>
@@ -87,6 +122,7 @@
         </div>
     {% endif %}
 
+    <!-- Boton de retorno al home -->
     <div class="container d-flex justify-content-center gap-3 my-3">
         <a href="/" class="btn btn-primary"> Volver al Inicio </a>
     </div>
