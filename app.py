@@ -10,9 +10,9 @@ app = Flask(__name__)
 
 ### DATABASE MANAGER ###
 
-myClient = pymongo.MongoClient("mongodb://localhost:27017")     # Conexion
-myDB = myClient["bgdb"]                                         # Base de datos
-myCollection = myDB["items"]                                    # Coleccion
+myClient = pymongo.MongoClient("mongodb://mongo-bgbd:27017/bgbd")     # Conexion
+myDB = myClient["bgdb"]                                               # Base de datos
+myCollection = myDB["items"]                                          # Coleccion
 
 ## Ingresa un nuevo documento a la coleccion ##
 def insertNew(data):
