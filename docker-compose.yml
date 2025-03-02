@@ -6,8 +6,8 @@ services:
     ports:
       - "80:80"
     environment:
-      - MONGO_URI=mongodb://mongo-bgbd:27017/bgbd
-      - FLASK_APP=run.py
+      - MONGO_URI=mongodb://mongo-bgdb:27017/bgdb
+      - FLASK_APP=app.py
     depends_on:
       - mongodb
     container_name: bgdb
