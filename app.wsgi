@@ -1,10 +1,8 @@
 import sys
 import os
 
-venv_path = '/app/venv'  # Ruta al entorno virtual dentro del contenedor
-sys.path.insert(0, os.path.join(venv_path, 'lib', 'python3.12', 'site-packages'))
+sys.path.insert(0, '/usr/local/lib/python3.12/site-packages')
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-from src import app as application
-
+from app import app as application
