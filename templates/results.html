@@ -12,8 +12,7 @@
     {% elif mensaje == 1 %}
         <!-- Existe juego con el mismo nombre -->
         <div class="container text-center alert alert-danger my-2" role="alert">
-            Ya existe un juego con el nombre "{{ items[0]['name'] }}" en nuestros registros.
-            Verifique los datos ingresados.
+            Ya existe un juego con el ID "{{ items[0]['id']}}" o con el nombre "{{ items[0]['name'] }}" en nuestros registros. Verifique los datos ingresados.
         </div>
     {% elif mensaje == 2 %}
         <!-- Juego agregado -->
@@ -71,7 +70,7 @@
 
     <!-- Se muestran los datos de elementos encontrados, actualizados, ingresados, eliminados... -->
     {% for item in items %}
-        {% set claves = [ "ID:", 
+        {% set claves = [ "ID Mongo:", "ID propio:", 
                       "Nombre del juego:",
                       "Minima cantidad de jugadores:",
                       "Maxima cantidad de jugadores:",

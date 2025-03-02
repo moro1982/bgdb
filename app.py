@@ -1,7 +1,7 @@
 import pymongo
 from bson import ObjectId       # Libreria para trabajar con ObjectIDs de MongoDB
 from flask import Flask, render_template, request, redirect, url_for
-from subprocess import call
+from subprocess import call     # Libreria con funcion
 
 app = Flask(__name__)
 
@@ -13,18 +13,40 @@ app = Flask(__name__)
 myClient = pymongo.MongoClient("mongodb://localhost:27017")     # Conexion
 myDB = myClient["bgdb"]                                         # Base de datos
 myCollection = myDB["items"]                                    # Coleccion
+myCounter = myDB["counter"]
+
+##########################################################################
+
+## Inicializar Contador ##
+items = myCollection.find().to_list()
+valoresIDs = [ item['id'] for item in items ]
+last_id = 0
+if valoresIDs.__len__() != 0:
+    last_id = max(valoresIDs)
+        
+contador01 = myCounter.find_one()
+if contador01 == None :
+    print("Contador no inicializado")
+    insertado = myCounter.insert_one( {"lastID" : last_id} )
+    print( "Inicializando contador // Default = 0 // " + str(insertado ))
+else:
+    print("Contador inicializado previamente: " + str(contador01))
+    
+##########################################################################
+
+### FUNCIONES DE CRUD ###
 
 ## Ingresa un nuevo documento a la coleccion ##
 def insertNew(data):
-    for k in data:
-        if k in {"minPlayers", "maxPlayers", "minAge"}:
-            data[k] = int(data[k])
-        if k == "priceDollars":
-            data[k] = float(data[k])
     insertion = myCollection.insert_one(data)
-    print("ID insertado: " + str(insertion.inserted_id) + str(type(insertion.inserted_id)))
     result = myCollection.find_one(insertion.inserted_id)
+    # Actualizamos contador de ultimo ID ingresado 
+    currentIndex = myCounter.find_one()['lastID']
+    myCounter.update_one({'lastID' : currentIndex} ,
+                         {"$inc" : {'lastID' :  1 } }
+                        )
     return result
+
 
 ## Trae solo el primer documento ##
 def readOnce():
@@ -37,14 +59,14 @@ def readAll():
     return result
 
 ## Busca todos los documentos filtrados por el criterio (expresado en los clave-valor del diccionario pasado como parametro) ##
-def queryData(queryDict):
+def queryData(filtrado):
     # Creo un array con los elementos k:v del dict "filtrado"
     items = []
-    for k in queryDict:
+    for k in filtrado:
         if k == "_id":
-            items.append({ k : ObjectId(queryDict[k]) })
+            items.append({ k : ObjectId(filtrado[k]) })
         else:
-            items.append({ k : queryDict[k] })
+            items.append({ k : filtrado[k] })
     result = myCollection.find({"$and": items})
     return result
 
@@ -104,7 +126,7 @@ def filtrarForm(formInput):
     filtrado = { k:v for k,v in formDict.items() if v != '' }
     # Modifico el tipo de dato de los campos numericos (string a int o float)
     for k in filtrado:
-        if k in {"minPlayers", "maxPlayers", "minAge"}:
+        if k in {"id", "minPlayers", "maxPlayers", "minAge"}:
             filtrado[k] = (int)(filtrado[k])
         if k == "priceDollars":
             filtrado[k] = (float)(filtrado[k])
@@ -112,21 +134,36 @@ def filtrarForm(formInput):
 
 ## Funcion para validar campos de Insercion/Actualizacion de registros ##
 def validarForm(filtrado):
+    retorno = []
     cantValidos = filtrado.items().__len__()
-    if cantValidos < 6:
-        # Campos vacios
+    # Campos vacios
+    if cantValidos < 7:
         codValidacion = 10
-        return codValidacion
-    else:
-        # Validar campo 'name' #
-        encontrados = queryData( {'name' : filtrado['name']} )
-        listaEncontrados = encontrados.to_list()
-        cantidad = len(listaEncontrados)
-        if cantidad > 0:
-            # Nombre encontrado
-            codValidacion = 11
-            return codValidacion
-    
+        retorno.append(codValidacion)
+        return retorno        
+    # Validar campo 'id' #
+    encontrados = myCollection.find( {'id' : filtrado['id']} )
+    listaEncontrados = encontrados.to_list()
+    cantidad = len(listaEncontrados)
+    if cantidad > 0:
+        # ID encontrado
+        codValidacion = 11
+        retorno.extend(listaEncontrados)
+        retorno.append(codValidacion)
+        print(retorno)
+        return retorno
+    # Validar campo 'name' #
+    encontrados = myCollection.find( {'name' : filtrado['name']} )
+    listaEncontrados = encontrados.to_list()
+    cantidad = len(listaEncontrados)
+    if cantidad > 0:
+        # Nombre encontrado
+        codValidacion = 12
+        retorno.extend(listaEncontrados)
+        retorno.append(codValidacion)
+        print(retorno)
+        return retorno
+
 ###################################################################################################
 ###################################################################################################
 
@@ -141,13 +178,11 @@ def main():
 @app.route("/search", methods=['GET', 'POST'])
 def search():    
     if request.method == "POST":
-        
         formInput = request.form
         # Aplico funcion para quitar campos vacios y corregir tipos numericos
         filtrado = filtrarForm(formInput)
         # Quito y almaceno el campo "accion"
-        accion = filtrado.pop("accion")            
-        
+        accion = filtrado.pop("accion")
         # Busqueda - "filtrado" --> parametro
         listaResultados = []
         if filtrado.items().__len__() != 0:
@@ -155,11 +190,9 @@ def search():
             listaResultados = queryData(filtrado).to_list()
         else:
             # Si el "filtrado" esta vacio, retornara todos los documentos
-            listaResultados = readAll().to_list()
-            
+            listaResultados = readAll().to_list()            
         # Contamos la cantidad de elementos encontrados
         cantidad = len(listaResultados)
-        print("Cantidad de elementos: " + str(cantidad))
         if cantidad == 0:
             # Si no encuentro elementos, paso solo el mensaje de error a la vista
             return render_template( "results.html", mensaje=0 )
@@ -182,35 +215,32 @@ def search():
 ## Ruta formulario de insercion de registros a la BBDD ##
 @app.route("/agregar")
 def agregar():
-    return render_template("agregar.html")
+    currentIndex = myCounter.find_one()['lastID']
+    nextIndex = currentIndex + 1
+    return render_template("agregar.html", nextIndex=nextIndex)
 
 ## Ruta intermedia del metodo POST activado desde formulario de "agregar.html" ##
 @app.route("/agregando_item", methods=['GET', 'POST'])
 def agregando_item():
     if request.method == 'POST':
         formInput = request.form
-        
         # Filtrado de campos vacios y correccion de tipos numericos
         filtrado = filtrarForm(formInput)
-        
         # Validacion de los campos del formulario - Gestion de errores
-        codigoValidacion = validarForm(filtrado)
-        print(codigoValidacion)
-        
-        if codigoValidacion == 11:
-            resultado = queryData( {'name' : filtrado['name']} )
-            listaEncontrados = resultado.to_list()
-            # mensaje == 1 --> Elemento encontrado por 'name'
-            return render_template("results.html", items=listaEncontrados, mensaje=1)
-        elif codigoValidacion == 10:
-            # mensaje == 8 --> Hay campos vacios
-            return render_template("results.html", mensaje=8)
+        resultadoValidacion = validarForm(filtrado)
+        if resultadoValidacion != None:
+            codigoValidacion = resultadoValidacion.pop()
+            if codigoValidacion in [11,12]:
+                # mensaje == 1 --> Elemento encontrado por 'id' o 'name'
+                return render_template("results.html", items=resultadoValidacion, mensaje=1)
+            if codigoValidacion == 10:
+                # mensaje == 8 --> Hay campos vacios
+                return render_template("results.html", mensaje=8)
         else:
             # Insertamos los datos del nuevo juego
             agregado = insertNew(filtrado)
             listaAgregados = []
             listaAgregados.append(agregado)
-            
             if len(listaAgregados) > 0:
                 return render_template("results.html", items=listaAgregados, mensaje=2)
             else:
@@ -228,28 +258,28 @@ def actualizar():
 def actualizando_item(objID):
     if request.method == 'POST':
         formInput = request.form
-        
         # Filtrado de campos vacios y correccion de tipos numericos
         filtrado = filtrarForm(formInput)
-        
         # Validacion de los campos del formulario - Gestion de errores
-        #####################################
-        codValidacion = validarForm(filtrado)
-        print(codValidacion)
-        
-        if codValidacion == 10:
+        resultadoValidacion = validarForm(filtrado)
+        codigoValidacion = resultadoValidacion.pop()
+        if codigoValidacion == 10 :
             # mensaje == 8 --> Hay campos vacios
             return render_template("results.html", mensaje=8)
+        elif codigoValidacion == 11 and resultadoValidacion[0]['_id'] != ObjectId(objID) :
+            # mensaje == 1 --> Elemento encontrado por 'id
+            return render_template("results.html", items=resultadoValidacion, mensaje=1)
         else:
+            # Si no hay errores, actualizo el registro
             actualizado = updateDataKeyValue("_id", ObjectId(objID), filtrado)
             return render_template("results.html", item=actualizado, mensaje=4)
+    else:
+        return redirect("/")
 
 ## Ruta intermedia activada desde la vista "results.html" con accion "Eliminar" ##
 @app.route("/eliminar/<objID>")
 def eliminar(objID):
-    print(objID)
     eliminado = deleteDataObjID(objID)
-    print(eliminado)
     return render_template("results.html", item=eliminado, mensaje=7)
 
 ## Ruta Backup ##
@@ -337,6 +367,14 @@ if __name__ == "__main__":
 #           "fromCountry": "Argentina",
 #           "priceDollars": "9.99"
 #           }
+# item11 = {"id": 11,
+#           "name": "Ajedrez Clasico",
+#           "minPlayers": 2,
+#           "maxPlayers": 2,
+#           "minAge": 5,
+#           "fromCountry": "Francia",
+#           "priceDollars": 35.6
+#           }
 #
 ######################################################################################################
 #
@@ -358,4 +396,3 @@ if __name__ == "__main__":
 # deleteDataObjID("67a19bf726f50c5f65dd85b2")
 
 ################################################################################################
-

@@ -4,6 +4,16 @@
     <h3 class="text-center"> Verifique y actualice los datos del juego: </h3>
     <form method="POST" action="{{ url_for('actualizando_item', objID=item['_id']) }}" class="container my-3">
         <div class="mb-3">
+            <label for="id" class="form-label"> Id propio </label>
+            <input 
+                type="number" 
+                class="form-control" 
+                id="id" 
+                name="id" 
+                value="{{ item['id'] }}"
+            >
+        </div>
+        <div class="mb-3">
             <label for="name" class="form-label"> Nombre del juego </label>
             <input 
                 type="text" 
