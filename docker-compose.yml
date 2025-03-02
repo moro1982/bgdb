@@ -9,12 +9,12 @@ services:
       - MONGO_URI=mongodb://mongo-bgdb:27017/bgdb
       - FLASK_APP=app.py
     depends_on:
-      - mongodb
+      - mongo-bgdb
     container_name: bgdb
 
-  mongodb:
+  mongo-bgdb:
     image: mongo:latest
-    container_name: mongo_container
+    container_name: mongo-bgdb
     ports:
       - "27017:27017"
     volumes:
