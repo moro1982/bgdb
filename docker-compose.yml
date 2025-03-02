@@ -19,6 +19,8 @@ services:
       - "27017:27017"
     volumes:
       - ./data/mongo:/data/db
+    #para generar un backup en formato json ejecutar este comando:
+    #docker exec -it mongo-bgdb mongoexport --db=bgdb --collection=items --out=/data/db/backup.json --jsonArray
 
 volumes:
   mongo-data:
