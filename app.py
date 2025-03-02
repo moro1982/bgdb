@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 ### DATABASE MANAGER ###
 
-myClient = pymongo.MongoClient("mongodb://localhost:27017")     # Conexion
+myClient = pymongo.MongoClient("mongodb://mongo-bgdb:27017/bgdb")     # Conexion
 myDB = myClient["bgdb"]                                         # Base de datos
 myCollection = myDB["items"]                                    # Coleccion
 myCounter = myDB["counter"]
