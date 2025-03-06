@@ -5,7 +5,7 @@
     <form method="POST" action="{{url_for('agregando_item')}}" class="container my-3">
         <div class="mb-3">
             <label for="id" class="form-label"> ID propio </label>
-            <input type="text" class="form-control w-25" id="id" name="id" placeholder="Proximo sugerido: {{ nextIndex }}">
+            <input type="number" class="form-control w-25" id="id" name="id" placeholder="Proximo sugerido: {{ nextIndex }}">
         </div>
         <div class="mb-3">
             <label for="name" class="form-label"> Nombre del juego </label>
