@@ -1,8 +1,8 @@
-# Este proyecto constituye el trabajo practico final para la asignatura Sistemas Operativos de la carrera de Analista Universitario en Sistemas #
+### Este proyecto constituye el trabajo practico final para la asignatura Sistemas Operativos de la carrera de Analista Universitario en Sistemas ###
 
-### APLICACION "BOARDGAME DATABASE" (bgdb) ###
+# APLICACION "BOARDGAME DATABASE" (bgdb) #
 
-# Descripcion general
+## Descripcion general ##
 
 La aplicacion esta desarrollada en Python y Flask, con un enfoque mas bien funcional, en virtud de la simplicidad de las funcionalidades requeridas.
 
