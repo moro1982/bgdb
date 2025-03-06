@@ -112,7 +112,7 @@ def deleteDataObjID(id):
 
 ## Realizar un backup de la BBDD ##
 def exportarMongo():
-    call("mongoexport --uri=mongodb://localhost:27017 --db=bgdb --collection=items --jsonArray --pretty --out=backup/bgdb_backup.json")
+    call("mongoexport --uri=mongodb://mongo-bgdb:27017/bgdb --db=bgdb --collection=items --jsonArray --pretty --out=backup/bgdb_backup.json")
 
 ###################################################################################################
 ###################################################################################################
