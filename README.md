@@ -28,4 +28,5 @@ Si la base de datos no trae la coleccion "counter", entonces el script la inicia
 ### Introduccion ###
 
 La aplicacion se corre en 2 contenedores diferentes, como se muestra en el grafico: uno con el el stack Apache-Python-Flask, y otro con la base de datos MongoDB. En el primero, ademas, se agrega el modulo WSGI, que oficia de intermediario necesario entre Apache y Python.
+Los contenedores se comunican a través de la librería "pymongo" para hacer las consultas y escrituras en la base de datos.
 
