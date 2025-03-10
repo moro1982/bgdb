@@ -41,5 +41,6 @@ El archivo apache-flask.conf configura Apache para servir la aplicación Flask m
 ### WSGI ###
 El archivo app.wsgi actúa como el punto de entrada para que Apache, a través de mod_wsgi, ejecute la aplicación Flask. Configura la ruta de Python para incluir los paquetes necesarios y el directorio de la aplicación. Luego, importa el objeto app desde app.py y lo expone como application, que es el nombre requerido por mod_wsgi para ejecutar la aplicación. Esto permite que Apache sirva Flask correctamente, manejando las solicitudes HTTP entrantes.
 
+## Anexos ##
 Para finalizar y dejar claro el funcionamiento se adjunta un esquema que muestra el funcionamiento y la conexión entre los contedores.
 
