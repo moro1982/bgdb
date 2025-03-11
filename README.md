@@ -13,7 +13,7 @@ Los formularios poseen tanto validacion en el HTML como en el backend. Para el p
 Minimo y Maximo de Jugadores, Edad minima y Precio. En el backend, creamos 2 funciones que filtran los datos del formulario (filtrarForm) y validan que no exista el ID o el Nombre del juego (validarForm). En caso de encontrar coincidencias, la funcion redireccionara a una pagina con el mensaje correspondiente.
 
 La app cuenta tambien con un contador interno que oficia de registro para el autoincremento del ID durante la insercion de nuevos registros. Este
-contador se almacena en la base de datos en una coleccion diferenciada de la coleccion principal, ya que .
+contador se almacena en la base de datos en una coleccion diferenciada de la coleccion principal.
 
 ### Base de Datos ###
 
